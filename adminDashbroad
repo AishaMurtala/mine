@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drug Inventory Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-image: url('https://image.freepik.com/free-vector/realistic-pills-background_1284-7764.jpg');
+            background-size: cover;
+            background-position: center;
+            color: #333;
+        }
+
+        .dashboard-container {
+            display: flex;
+      
+        }
+
+        .sidebar {
+            background-color: #2c3e50;
+            color: white;
+            width: 250px;
+            padding: 20px;
+            position: fixed;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar ul li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar ul li a {
+            text-decoration: none;
+            color: white;
+            font-size: 18px;
+            display: block;
+            padding: 10px;
+            transition: 0.3s;
+        }
+
+        .sidebar ul li a:hover {
+            background-color: #34495e;
+        }
+
+        .content {
+            margin-left: 250px;
+            padding: 30px;
+            width: 100%;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: all 0.3s ease-in-out;
+            transform: perspective(1000px);
+        }
+
+        .card:hover {
+            transform: rotateY(10deg);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h4 {
+            margin-bottom: 15px;
+            color: #3498db;
+        }
+
+        .card .number {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .card button {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+
+        .card button:hover {
+            background-color: #2980b9;
+        }
+
+        /* Modal Styling */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-content h4 {
+            margin-bottom: 15px;
+        }
+
+        .modal-content input,
+        .modal-content select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .modal-content button {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .modal-content button:hover {
+            background-color: #2980b9;
+        }
+
+        .modal .close {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 30px;
+            color: #333;
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <h2>Admin Dashboard</h2>
+            <ul>
+                <li><a href="#" id="inventory-tab">Inventory</a></li>
+                <li><a href="#" id="orders-tab">Orders</a></li>
+                <li><a href="#" id="deliveries-tab">Deliveries</a></li>
+                
+            </ul>
+            <center> <button class="button" id="logout-btn" style="display:none;">Logout</button></center>
+        </aside>
+        <main class="content">
+            <section id="inventory-section" class="section">
+                <h3>Manage Inventory</h3>
+                <div class="card-container">
+                    <!-- Inventory cards will be inserted here -->
+                </div>
+                <button id="add-inventory-btn">Add New Drug</button>
+            </section>
+            
+            <section id="orders-section" class="section" style="display:none;">
+                <h3>Manage Orders</h3>
+                <div class="card-container">
+                    <!-- Orders cards will be inserted here -->
+                </div>
+                <button id="add-order-btn">Create Order</button>
+            </section>
+
+            <section id="deliveries-section" class="section" style="display:none;">
+                <h3>Manage Deliveries</h3>
+                <div class="card-container">
+                    <!-- Deliveries cards will be inserted here -->
+                </div>
+                <button id="add-delivery-btn">Create Delivery</button>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal for Adding Inventory -->
+    <div id="inventoryModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('inventoryModal')">&times;</span>
+            <h4 id="inventory-modal-title">Add New Drug</h4>
+            <input type="text" id="drug-name" placeholder="Drug Name">
+            <input type="number" id="drug-stock" placeholder="Stock">
+            <input type="number" id="drug-price" placeholder="Price">
+            <button onclick="saveInventory()">Save Drug</button>
+        </div>
+    </div>
+
+    <!-- Modal for Adding Order -->
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('orderModal')">&times;</span>
+            <h4>Create New Order</h4>
+            <input type="text" id="order-customer" placeholder="Customer Name">
+            <input type="text" id="order-drug" placeholder="Drug">
+            <input type="number" id="order-quantity" placeholder="Quantity">
+            <select id="order-status">
+                <option value="Pending">Pending</option>
+                <option value="Shipped">Shipped</option>
+            </select>
+            <button onclick="saveOrder()">Create Order</button>
+        </div>
+    </div>
+
+    <!-- Modal for Adding Delivery -->
+    <div id="deliveryModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('deliveryModal')">&times;</span>
+            <h4>Create New Delivery</h4>
+            <input type="text" id="delivery-location" placeholder="Delivery Location">
+            <select id="delivery-status">
+                <option value="In Progress">In Progress</option>
+                <option value="Delivered">Delivered</option>
+            </select>
+            <button onclick="saveDelivery()">Create Delivery</button>
+        </div>
+    </div>
+
+    <script>
+        // Data Arrays
+        let inventoryData = [
+            { id: 1, name: "Paracetamol", stock: 120, price: 10 },
+            { id: 2, name: "Ibuprofen", stock: 80, price: 15 },
+            { id: 3, name: "Aspirin", stock: 200, price: 8 }
+        ];
+
+        let ordersData = [
+            { id: 1, customer: "John Doe", drug: "Paracetamol", quantity: 10, status: "Pending" },
+            { id: 2, customer: "Jane Smith", drug: "Ibuprofen", quantity: 5, status: "Shipped" }
+        ];
+
+        let deliveriesData = [
+            { id: 1, orderId: 1, location: "123 Main St", status: "In Progress" },
+            { id: 2, orderId: 2, location: "456 Oak Ave", status: "Delivered" }
+        ];
+
+        // Show inventory as cards
+        function displayInventory() {
+            const container = document.querySelector('#inventory-section .card-container');
+            container.innerHTML = '';
+            inventoryData.forEach(item => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.innerHTML = `
+                    <h4>${item.name}</h4>
+                    <div class="number">${item.stock} Available</div>
+                    <p>Price: $${item.price}</p>
+                    <button onclick="editInventory(${item.id})">Edit</button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Show orders as cards
+        function displayOrders() {
+            const container = document.querySelector('#orders-section .card-container');
+            container.innerHTML = '';
+            ordersData.forEach(order => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.innerHTML = `
+                    <h4>Order ID: ${order.id}</h4>
+                    <p>Customer: ${order.customer}</p>
+                    <p>Drug: ${order.drug}</p>
+                    <p>Quantity: ${order.quantity}</p>
+                    <p>Status: ${order.status}</p>
+                    <button onclick="editOrder(${order.id})">Edit</button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Show deliveries as cards
+        function displayDeliveries() {
+            const container = document.querySelector('#deliveries-section .card-container');
+            container.innerHTML = '';
+            deliveriesData.forEach(delivery => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.innerHTML = `
+                    <h4>Delivery ID: ${delivery.id}</h4>
+                    <p>Order ID: ${delivery.orderId}</p>
+                    <p>Location: ${delivery.location}</p>
+                    <p>Status: ${delivery.status}</p>
+                    <button onclick="editDelivery(${delivery.id})">Edit</button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Switch Sections
+        document.getElementById('inventory-tab').addEventListener('click', () => {
+            document.getElementById('inventory-section').style.display = 'block';
+            document.getElementById('orders-section').style.display = 'none';
+            document.getElementById('deliveries-section').style.display = 'none';
+            displayInventory();
+        });
+
+        document.getElementById('orders-tab').addEventListener('click', () => {
+            document.getElementById('inventory-section').style.display = 'none';
+            document.getElementById('orders-section').style.display = 'block';
+            document.getElementById('deliveries-section').style.display = 'none';
+            displayOrders();
+        });
+
+        document.getElementById('deliveries-tab').addEventListener('click', () => {
+            document.getElementById('inventory-section').style.display = 'none';
+            document.getElementById('orders-section').style.display = 'none';
+            document.getElementById('deliveries-section').style.display = 'block';
+            displayDeliveries();
+        });
+
+        // Add Inventory Item
+        function saveInventory() {
+            const name = document.getElementById('drug-name').value;
+            const stock = document.getElementById('drug-stock').value;
+            const price = document.getElementById('drug-price').value;
+
+            if (name && stock && price) {
+                const newItem = {
+                    id: inventoryData.length + 1,
+                    name,
+                    stock: parseInt(stock),
+                    price: parseFloat(price)
+                };
+                inventoryData.push(newItem);
+                displayInventory();
+                closeModal('inventoryModal');
+            }
+        }
+
+        // Save Order and Update Inventory
+        function saveOrder() {
+            const customer = document.getElementById('order-customer').value;
+            const drug = document.getElementById('order-drug').value;
+            const quantity = document.getElementById('order-quantity').value;
+            const status = document.getElementById('order-status').value;
+
+            if (customer && drug && quantity && status) {
+                // Update inventory stock
+                const drugItem = inventoryData.find(item => item.name === drug);
+                if (drugItem && drugItem.stock >= quantity) {
+                    drugItem.stock -= quantity;  // Decrease the stock based on order quantity
+                    const newOrder = {
+                        id: ordersData.length + 1,
+                        customer,
+                        drug,
+                        quantity: parseInt(quantity),
+                        status
+                    };
+                    ordersData.push(newOrder);
+                    displayOrders();
+                    displayInventory();
+                    closeModal('orderModal');
+                } else {
+                    alert("Not enough stock for this order.");
+                }
+            }
+        }
+
+        // Save Delivery
+        function saveDelivery() {
+            const location = document.getElementById('delivery-location').value;
+            const status = document.getElementById('delivery-status').value;
+
+            if (location && status) {
+                const newDelivery = {
+                    id: deliveriesData.length + 1,
+                    orderId: deliveriesData.length + 1,
+                    location,
+                    status
+                };
+                deliveriesData.push(newDelivery);
+                displayDeliveries();
+                closeModal('deliveryModal');
+            }
+        }
+
+        // Open Modal for Inventory
+        document.getElementById('add-inventory-btn').addEventListener('click', () => {
+            document.getElementById('inventory-modal-title').textContent = 'Add New Drug';
+            document.getElementById('drug-name').value = '';
+            document.getElementById('drug-stock').value = '';
+            document.getElementById('drug-price').value = '';
+            document.getElementById('inventoryModal').style.display = 'flex';
+        });
+
+        // Open Modal for Order
+        document.getElementById('add-order-btn').addEventListener('click', () => {
+            document.getElementById('order-customer').value = '';
+            document.getElementById('order-drug').value = '';
+            document.getElementById('order-quantity').value = '';
+            document.getElementById('order-status').value = 'Pending';
+            document.getElementById('orderModal').style.display = 'flex';
+        });
+
+        // Open Modal for Delivery
+        document.getElementById('add-delivery-btn').addEventListener('click', () => {
+            document.getElementById('delivery-location').value = '';
+            document.getElementById('delivery-status').value = 'In Progress';
+            document.getElementById('deliveryModal').style.display = 'flex';
+        });
+
+        // Close Modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Edit Inventory Item
+        function editInventory(id) {
+            const item = inventoryData.find(i => i.id === id);
+            document.getElementById('inventory-modal-title').textContent = 'Edit Drug';
+            document.getElementById('drug-name').value = item.name;
+            document.getElementById('drug-stock').value = item.stock;
+            document.getElementById('drug-price').value = item.price;
+            document.getElementById('inventoryModal').style.display = 'flex';
+
+            // Add an update button
+            const saveButton = document.querySelector('.modal-content button');
+            saveButton.textContent = 'Update Drug';
+            saveButton.setAttribute('onclick', `updateInventory(${id})`);
+        }
+
+        // Update Inventory Item
+        function updateInventory(id) {
+            const name = document.getElementById('drug-name').value;
+            const stock = document.getElementById('drug-stock').value;
+            const price = document.getElementById('drug-price').value;
+
+            const item = inventoryData.find(i => i.id === id);
+            if (name && stock && price) {
+                item.name = name;
+                item.stock = parseInt(stock);
+                item.price = parseFloat(price);
+                displayInventory();
+                closeModal('inventoryModal');
+            }
+        }
+
+        // Edit Order
+        function editOrder(id) {
+            const order = ordersData.find(o => o.id === id);
+            document.getElementById('order-customer').value = order.customer;
+            document.getElementById('order-drug').value = order.drug;
+            document.getElementById('order-quantity').value = order.quantity;
+            document.getElementById('order-status').value = order.status;
+            document.getElementById('orderModal').style.display = 'flex';
+
+            const saveButton = document.querySelector('.modal-content button');
+            saveButton.textContent = 'Update Order';
+            saveButton.setAttribute('onclick', `updateOrder(${id})`);
+        }
+
+        // Update Order
+        function updateOrder(id) {
+            const customer = document.getElementById('order-customer').value;
+            const drug = document.getElementById('order-drug').value;
+            const quantity = document.getElementById('order-quantity').value;
+            const status = document.getElementById('order-status').value;
+
+            const order = ordersData.find(o => o.id === id);
+            if (customer && drug && quantity && status) {
+                order.customer = customer;
+                order.drug = drug;
+                order.quantity = parseInt(quantity);
+                order.status = status;
+                displayOrders();
+                displayInventory();
+                closeModal('orderModal');
+            }
+        }
+
+        // Edit Delivery
+        function editDelivery(id) {
+            const delivery = deliveriesData.find(d => d.id === id);
+            document.getElementById('delivery-location').value = delivery.location;
+            document.getElementById('delivery-status').value = delivery.status;
+            document.getElementById('deliveryModal').style.display = 'flex';
+
+            const saveButton = document.querySelector('.modal-content button');
+            saveButton.textContent = 'Update Delivery';
+            saveButton.setAttribute('onclick', `updateDelivery(${id})`);
+        }
+
+        // Update Delivery
+        function updateDelivery(id) {
+            const location = document.getElementById('delivery-location').value;
+            const status = document.getElementById('delivery-status').value;
+
+            const delivery = deliveriesData.find(d => d.id === id);
+            if (location && status) {
+                delivery.location = location;
+                delivery.status = status;
+                displayDeliveries();
+                closeModal('deliveryModal');
+            }
+        }
+
+        // Initialize the dashboard
+        displayInventory();
+    </script>
+    <script>
+        // Check if the user is logged in by checking the localStorage
+        const loggedIn = localStorage.getItem('loggedIn');
+        const logoutButton = document.getElementById('logout-btn');
+
+        // If the user is logged in, show the logout button
+        if (loggedIn === 'true') {
+            logoutButton.style.display = 'block'; // Display logout button
+        }
+
+        // Logout function to clear session and redirect to login page
+        function logout() {
+            localStorage.removeItem('loggedIn'); // Remove logged-in status from localStorage
+            localStorage.removeItem('loggedInUsername'); // Remove logged-in username from localStorage
+            window.location.href = 'login.html'; // Redirect to login page
+        }
+
+        // Add event listener to the logout button
+        logoutButton.addEventListener('click', logout);
+    </script>
+</body>
+</html>
